@@ -1,0 +1,28 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Package xmlns="http://schemas.microsoft.com/appx/2010/manifest">
+  <Identity Name="a6316bf0-d1f1-48cb-96d7-aa103ae690af" Publisher="CN=cocos2d-x" Version="1.0.0.0" />
+  <Properties>
+    <DisplayName>cocos2dmetro-SimpleGame</DisplayName>
+    <PublisherDisplayName>cocos2d-x</PublisherDisplayName>
+    <Logo>Assets\StoreLogo.png</Logo>
+    <Description>FishingJoy_win8_metro</Description>
+  </Properties>
+  <Prerequisites>
+    <OSMinVersion>6.2</OSMinVersion>
+    <OSMaxVersionTested>6.2</OSMaxVersionTested>
+  </Prerequisites>
+  <Resources>
+    <Resource Language="x-generate" />
+  </Resources>
+  <Applications>
+    <Application Id="App" Executable="$targetnametoken$.exe" EntryPoint="cocos2dmetro-SimpleGame.App">
+      <VisualElements DisplayName="cocos2dmetro-SimpleGame" Logo="Assets\Logo.png" SmallLogo="Assets\SmallLogo.png" Description="cocos2dmetro-SimpleGame" ForegroundText="light" BackgroundColor="#FFFFFF">
+        <DefaultTile ShowName="wideLogoOnly" WideLogo="Assets\WideLogo.png" ShortName="SimpleGame" />
+        <SplashScreen Image="Assets\SplashScreen.png" />
+      </VisualElements>
+    </Application>
+  </Applications>
+  <Capabilities>
+    <Capability Name="documentsLibrary" />
+  </Capabilities>
+</Package>
