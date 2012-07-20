@@ -67,29 +67,9 @@ bool HelloWorld::init()
 		// add your codes below...
 		//////////////////////////////////////////////////////////////////////////
 
-		// 1. Add a menu item with "X" image, which is clicked to quit the program.
-
-		// Create a "close" menu item with close icon, it's an auto release object.
-		CCMenuItemImage *pCloseItem = CCMenuItemImage::itemFromNormalImage(
-			"CloseNormal.png",
-			"CloseSelected.png",
-			this,
-			menu_selector(HelloWorld::menuCloseCallback));
-		CC_BREAK_IF(! pCloseItem);
-
-		// Place the menu item bottom-right conner.
-		pCloseItem->setPosition(ccp(CCDirector::sharedDirector()->getWinSize().width - 20, 20));
-
-		// Create a menu with the "close" menu item, it's an auto release object.
-		CCMenu* pMenu = CCMenu::menuWithItems(pCloseItem, NULL);
-		pMenu->setPosition(CCPointZero);
-		CC_BREAK_IF(! pMenu);
-
-		// Add the menu to HelloWorld layer as a child layer.
-		this->addChild(pMenu, 1);
 
 		/////////////////////////////
-		// 2. add your codes below...
+		// 1. add your codes below...
 
 		CCSize winSize = CCDirector::sharedDirector()->getWinSize();
 		CCSprite *player = CCSprite::spriteWithFile("Player.png", 
@@ -116,11 +96,6 @@ bool HelloWorld::init()
 	return bRet;
 }
 
-void HelloWorld::menuCloseCallback(CCObject* pSender)
-{
-	// "close" menu item clicked
-	CCDirector::sharedDirector()->end();
-}
 
 // cpp with cocos2d-x
 void HelloWorld::addTarget()

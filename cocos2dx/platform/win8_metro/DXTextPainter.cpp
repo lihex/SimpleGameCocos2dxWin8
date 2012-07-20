@@ -1,3 +1,26 @@
+/****************************************************************************
+Copyright (c) 2012 cocos2d-x.org
+
+http://www.cocos2d-x.org
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+****************************************************************************/
 
 #include "DXTextPainter.h"
 
@@ -81,30 +104,34 @@ bool DXTextPainter::SetFont(Platform::String^ fontName , UINT nSize)
 
 Platform::Array<byte>^  DXTextPainter::DrawTextToImage(Platform::String^ text, Windows::Foundation::Size* tSize, TextAlignment alignment)
 {
-	//set text alignment
+	//set text alignment and paragraph alignment
 	switch (alignment)
 	{
 	case TextAlignment::TextAlignmentLeft: // left
 		DX::ThrowIfFailed(
 			m_TextFormat->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_LEADING)
 			);
+		DX::ThrowIfFailed(
+			m_TextFormat->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_NEAR)
+			);
 		break;
 	case TextAlignment::TextAlignmentRight: // right
 		DX::ThrowIfFailed(
 			m_TextFormat->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_TRAILING)
+			);
+		DX::ThrowIfFailed(
+			m_TextFormat->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_NEAR)
 			);
 		break;
 	case TextAlignment::TextAlignmentCenter: // center
 		DX::ThrowIfFailed(
 			m_TextFormat->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_CENTER)
 			);
+		DX::ThrowIfFailed(
+			m_TextFormat->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_CENTER)
+			);
 		break;
 	}
-
-	//set paragraph alignment
-	DX::ThrowIfFailed(
-		m_TextFormat->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_NEAR)
-		);
 
 	bool isShouldAdjustBounds = false;
 	if(tSize->Width <= 0)

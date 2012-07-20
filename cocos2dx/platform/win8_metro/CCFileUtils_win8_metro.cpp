@@ -192,8 +192,9 @@ unsigned char* CCFileUtils::getFileDataPlatform(const char* pszFileName, const c
 		}
 
 		dwFileSize = fileStandardInfo.EndOfFile.LowPart;
-		pBuffer = new BYTE[dwFileSize];
-
+		//for read text
+		pBuffer = new BYTE[dwFileSize+1];
+		pBuffer[dwFileSize] = 0;
 		if (!ReadFile(hFile, pBuffer, dwFileSize, &bytesRead, nullptr))
 		{
 			break;

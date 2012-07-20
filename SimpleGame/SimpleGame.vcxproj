@@ -63,7 +63,7 @@
   <PropertyGroup>
     <IncludePath>$(SolutionDir)CocosDenshion;$(SolutionDir)CocosDenshion\include;$(SolutionDir)cocos2dx;$(SolutionDir)cocos2dx\include;$(SolutionDir)cocos2dx\platform;$(VCInstallDir)include;$(VCInstallDir)atlmfc\include;$(WindowsSDK_IncludePath)</IncludePath>
     <PackageCertificateKeyFile>SimpleGame_TemporaryKey.pfx</PackageCertificateKeyFile>
-    <PackageCertificateThumbprint>40E92CD145F6E665E4946B803DB49926C5622D08</PackageCertificateThumbprint>
+    <PackageCertificateThumbprint>AA8BDDA6BA78535BFCF794E288324C17F2F05087</PackageCertificateThumbprint>
     <AppxAutoIncrementPackageRevision>False</AppxAutoIncrementPackageRevision>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -85,8 +85,8 @@
       <AdditionalIncludeDirectories>$(ProjectDir);$(IntermediateOutputPath);$(ProjectDir)..\cocos2dx\include;$(ProjectDir)..\cocos2dx;$(ProjectDir)..\cocos2dx\platform;$(ProjectDir)..\cocos2dx\platform\third_party\win8_metro\libxml2;$(ProjectDir)..\cocos2dx\platform\third_party\win8_metro\libpng;$(ProjectDir)..\cocos2dx\platform\third_party\win8_metro\zlib;$(ProjectDir)..\cocos2dx\platform\third_party\win8_metro\libjpeg;$(ProjectDir)..\cocos2dx\platform\win8_metro;$(ProjectDir)\Classes;$(ProjectDir)..\;$(ProjectDir)..\chipmunk\include\chipmunk;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions);USE_BATCH_NODE</PreprocessorDefinitions>
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions);USE_BATCH_NODE</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions);TIXML_USE_STL</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions);TIXML_USE_STL</PreprocessorDefinitions>
       <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">4018;4819</DisableSpecificWarnings>
       <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">4018;4819</DisableSpecificWarnings>
       <RuntimeLibrary Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">MultiThreadedDebugDLL</RuntimeLibrary>
@@ -278,6 +278,8 @@
     <ClInclude Include="..\CocosDenshion\include\SimpleAudioEngine.h" />
     <ClInclude Include="..\CocosDenshion\win8_metro\Audio.h" />
     <ClInclude Include="..\CocosDenshion\win8_metro\MediaStreamer.h" />
+    <ClInclude Include="..\tinyxml\tinystr.h" />
+    <ClInclude Include="..\tinyxml\tinyxml.h" />
     <ClInclude Include="AppDelegate.h" />
     <ClInclude Include="Classes\GameOverScene.h" />
     <ClInclude Include="Classes\HelloWorldScene.h" />
@@ -426,6 +428,10 @@
     <ClCompile Include="..\cocos2dx\touch_dispatcher\CCTouchHandler.cpp" />
     <ClCompile Include="..\CocosDenshion\win8_metro\MediaStreamer.cpp" />
     <ClCompile Include="..\CocosDenshion\win8_metro\SimpleAudioEngine.cpp" />
+    <ClCompile Include="..\tinyxml\tinystr.cpp" />
+    <ClCompile Include="..\tinyxml\tinyxml.cpp" />
+    <ClCompile Include="..\tinyxml\tinyxmlerror.cpp" />
+    <ClCompile Include="..\tinyxml\tinyxmlparser.cpp" />
     <ClCompile Include="AppDelegate.cpp" />
     <ClCompile Include="Classes\GameOverScene.cpp" />
     <ClCompile Include="Classes\HelloWorldScene.cpp" />

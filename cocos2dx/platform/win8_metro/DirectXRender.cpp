@@ -1,9 +1,26 @@
-//// THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF
-//// ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO
-//// THE IMPLIED WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A
-//// PARTICULAR PURPOSE.
-////
-//// Copyright (c) Microsoft Corporation. All rights reserved
+/****************************************************************************
+Copyright (c) 2012 cocos2d-x.org
+
+http://www.cocos2d-x.org
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+****************************************************************************/
 
 #include "DirectXRender.h" 
 #include "DXGI.h"
@@ -34,7 +51,6 @@ static DirectXRender^ s_pDXRender;
 // Constructor.
 DirectXRender::DirectXRender()
     : m_dpi(-1.0f)
-    , m_windowClosed(true)
 {
     s_pDXRender = this;
 }
@@ -43,14 +59,8 @@ DirectXRender::DirectXRender()
 void DirectXRender::Initialize(CoreWindow^ window, float dpi)
 {
     m_window = window;
-    m_windowClosed = false;
 	m_textPainter = ref new DXTextPainter();
 
-    window->Closed += 
-        ref new TypedEventHandler<CoreWindow^, CoreWindowEventArgs^>(this, &DirectXRender::OnWindowClosed);
-
-    window->VisibilityChanged +=
-        ref new TypedEventHandler<CoreWindow^, VisibilityChangedEventArgs^>(this, &DirectXRender::OnWindowVisibilityChanged);
 
     window->SizeChanged += 
         ref new TypedEventHandler<CoreWindow^, WindowSizeChangedEventArgs^>(this, &DirectXRender::OnWindowSizeChanged);
@@ -300,10 +310,11 @@ void DirectXRender::CreateWindowSizeDependentResources()
             );
 
         // Obtain the final swap chain for this window from the DXGI factory.
+		 CoreWindow^ window = m_window.Get();
         DX::ThrowIfFailed(
             dxgiFactory->CreateSwapChainForCoreWindow(
                 m_d3dDevice.Get(),
-                reinterpret_cast<IUnknown*>(m_window),
+                reinterpret_cast<IUnknown*>(window),
                 &swapChainDesc,
                 nullptr,    // allow on all displays
                 &m_swapChain
@@ -441,7 +452,7 @@ void DirectXRender::Present()
     // must completely reinitialize the renderer.
     if (hr == DXGI_ERROR_DEVICE_REMOVED || hr == DXGI_ERROR_DEVICE_RESET)
     {
-        Initialize(m_window, m_dpi);
+		Initialize(m_window.Get(), m_dpi);
     }
     else
     {
@@ -454,20 +465,6 @@ void DirectXRender::SetBackBufferRenderTarget()
 	m_d3dContext->OMSetRenderTargets(1, &m_renderTargetView, m_depthStencilView.Get());
 }
 
-void DirectXRender::CloseWindow()
-{
-    if (nullptr != m_window)
-    {
-        m_window->Close();
-        m_window = nullptr;
-    }
-    m_windowClosed = true;
-}
-
-bool DirectXRender::GetWindowsClosedState()
-{
-    return m_windowClosed;
-}
 
 DirectXRender^ DirectXRender::SharedDXRender()
 {
@@ -513,7 +510,6 @@ void DirectXRender::OnWindowClosed(
     _In_ CoreWindowEventArgs^ args
     )
 {
-    m_window = nullptr;
     m_windowClosed = true;
 }
 
@@ -522,14 +518,15 @@ void DirectXRender::OnWindowVisibilityChanged(
         _In_ Windows::UI::Core::VisibilityChangedEventArgs^ args
         )
 {
-    if (args->Visible)
-    {
-        CCApplication::sharedApplication().applicationWillEnterForeground();
-    } 
-    else
-    {
-        CCApplication::sharedApplication().applicationDidEnterBackground();
-    }
+	//m_windowVisible = args->Visible;
+ //   if (m_windowVisible)
+ //   {
+ //       CCApplication::sharedApplication().applicationWillEnterForeground();
+ //   } 
+ //   else
+ //   {
+ //       CCApplication::sharedApplication().applicationDidEnterBackground();
+ //   }
 }
 
 void DirectXRender::OnWindowSizeChanged(
