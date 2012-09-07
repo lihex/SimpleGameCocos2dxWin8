@@ -21,8 +21,9 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 ****************************************************************************/
-
 #include "DXTextPainter.h"
+#include "FontLoader.h"
+#include "CCCommon.h"
 
 using namespace Microsoft::WRL;
 using namespace Windows::UI::Core;
@@ -33,6 +34,31 @@ using namespace Windows::Storage;
 using namespace Windows::System;
 using namespace Windows::Storage::Streams;
 
+// helper functions to get the proper resolution scale
+// (even if invalid value is received)
+static int GetResolutionScaleInt()
+{
+    int resolutionScale = (int)Windows::Graphics::Display::DisplayProperties::ResolutionScale;
+	// if <= - consider as 100%
+	if (resolutionScale <= 0)
+		resolutionScale = 100;
+	return resolutionScale;
+}
+
+static float GetResolutionScale()
+{
+	return (float)GetResolutionScaleInt() / 100.0;
+}
+
+DXTextPainter::DXTextPainter()
+: m_fontLoader()
+, m_dwriteFactory()
+, m_fontCollection()
+, m_bUseCustomFont(false)
+, m_bIsFontChanged(false)
+{
+
+}
 
 void DXTextPainter:: Initialize(
 	_In_ ID2D1DeviceContext*  d2dContext,
@@ -46,16 +72,21 @@ void DXTextPainter:: Initialize(
 
 	m_fontName = L"Arial";
 	m_fontSize = 24;
+	m_bUseCustomFont = false;
+	m_bIsFontChanged = false;
+
 	wchar_t localeName[LOCALE_NAME_MAX_LENGTH] = {0};
 	GetUserDefaultLocaleName(localeName, LOCALE_NAME_MAX_LENGTH);
 	m_locale = ref new Platform::String(localeName);
-
 }
 
 
 bool DXTextPainter::SetFont(Platform::String^ fontName , UINT nSize)
 {
 	bool bReCreate = false;
+	std::wstring wstrFontName(fontName->Data());
+	std::wstring suffix = wstrFontName.substr(wstrFontName.rfind(L'.') == std::wstring::npos ? wstrFontName.length() : wstrFontName.rfind(L'.') + 1);
+
 
 	if(nSize!=0 && nSize != m_fontSize)
 	{
@@ -64,6 +95,7 @@ bool DXTextPainter::SetFont(Platform::String^ fontName , UINT nSize)
 	}
 
 	FLOAT fntSize = (FLOAT)m_fontSize;
+	fntSize /= GetResolutionScale();
 
     wchar_t localeName[LOCALE_NAME_MAX_LENGTH] = {0};
     GetUserDefaultLocaleName(localeName, LOCALE_NAME_MAX_LENGTH);
@@ -75,6 +107,76 @@ bool DXTextPainter::SetFont(Platform::String^ fontName , UINT nSize)
 	}
 
 
+	
+
+	if(suffix == L"" && (suffix.length() == 0))
+	{
+		//use sysstem font
+		m_bUseCustomFont = false;
+		m_fontName = ref new Platform::String(wstrFontName.c_str());
+		
+	}else{
+		// use custom font
+		m_bUseCustomFont = true;
+		int pos = wstrFontName.find_last_of(L'/')+1;
+		std::wstring wfontName(wstrFontName.substr(pos,wstrFontName.length()-pos-4));
+		
+		std::wstring oldFontName(m_fontName->Data());
+		if( oldFontName != wstrFontName )
+		{
+			m_bIsFontChanged = true;
+		}
+		m_fontName = ref new String(wfontName.c_str());
+
+
+
+		//create FontLoader if not exsit
+		if(nullptr == m_fontLoader){
+			m_fontLoader = new FontLoader(m_dwriteFactory.Get());
+			m_fontLoader->LoadFont(wstrFontName);
+			DX::ThrowIfFailed(
+				m_dwriteFactory->RegisterFontFileLoader(m_fontLoader.Get())
+				);
+			DX::ThrowIfFailed(
+				m_dwriteFactory->RegisterFontCollectionLoader(m_fontLoader.Get())
+				);
+		}else{
+			if(m_bIsFontChanged)
+			{
+				// Unregister the font loader from DirectWrite factory
+				DX::ThrowIfFailed(
+					m_dwriteFactory->UnregisterFontCollectionLoader(m_fontLoader.Get())
+					);
+
+				DX::ThrowIfFailed(
+					m_dwriteFactory->UnregisterFontFileLoader(m_fontLoader.Get())
+					);
+				m_fontLoader = nullptr;
+				m_fontCollection = nullptr;
+				m_fontLoader = new FontLoader(m_dwriteFactory.Get());
+				m_fontLoader->LoadFont(wstrFontName);
+				DX::ThrowIfFailed(
+					m_dwriteFactory->RegisterFontFileLoader(m_fontLoader.Get())
+					);
+				DX::ThrowIfFailed(
+					m_dwriteFactory->RegisterFontCollectionLoader(m_fontLoader.Get())
+					);
+			}
+		}
+
+		size_t fontCollectionKey = 0;
+
+		DX::ThrowIfFailed(
+			m_dwriteFactory->CreateCustomFontCollection(
+			m_fontLoader.Get(),
+			&fontCollectionKey,
+			sizeof(size_t),
+			&m_fontCollection
+			)
+			);
+
+	}
+
 	if(bReCreate && m_TextFormat){
 		//release old one
 		m_TextFormat = nullptr;
@@ -84,26 +186,27 @@ bool DXTextPainter::SetFont(Platform::String^ fontName , UINT nSize)
 	{
 		DX::ThrowIfFailed(
 			m_dwriteFactory->CreateTextFormat(
-			fontName->Data(), // fontName
-			nullptr,
+			m_fontName->Data(),
+			nullptr,  // Proper font collection will be set upon drawing
 			DWRITE_FONT_WEIGHT_LIGHT,
 			DWRITE_FONT_STYLE_NORMAL,
 			DWRITE_FONT_STRETCH_NORMAL,
-			fntSize,   //fntSize
-			m_locale->Data(),//L"en-US",
+			fntSize,
+			m_locale->Data(),
 			&m_TextFormat
 			)
 			);
 	}
 
-
-
 	return true;
 }
 
-
 Platform::Array<byte>^  DXTextPainter::DrawTextToImage(Platform::String^ text, Windows::Foundation::Size* tSize, TextAlignment alignment)
 {
+	if(text->Length() == 0){
+		return nullptr;
+	}
+
 	//set text alignment and paragraph alignment
 	switch (alignment)
 	{
@@ -136,7 +239,7 @@ Platform::Array<byte>^  DXTextPainter::DrawTextToImage(Platform::String^ text, W
 	bool isShouldAdjustBounds = false;
 	if(tSize->Width <= 0)
 	{
-		tSize->Width = 4096;
+		tSize->Width = FLT_MAX;
 		isShouldAdjustBounds = true;
 	}
 
@@ -146,34 +249,70 @@ Platform::Array<byte>^  DXTextPainter::DrawTextToImage(Platform::String^ text, W
 		m_textLayout = nullptr;
 	}
 
+
+
 	DX::ThrowIfFailed(
 		m_dwriteFactory->CreateTextLayout(
 		text->Data(),
 		text->Length(),
 		m_TextFormat.Get(),
 		tSize->Width,
-		4096.0f,
+		FLT_MAX,
 		&m_textLayout
 		)
 		);
 
+
+
+	//Here invalid!
+	DWRITE_TEXT_RANGE fullRange = {0, text->Length()};
+	DX::ThrowIfFailed(
+		m_textLayout->SetFontFamilyName(m_fontName->Data(),fullRange)
+		);
+	if(m_bUseCustomFont){
+		DX::ThrowIfFailed(
+			m_textLayout->SetFontCollection(m_fontCollection.Get(),fullRange)
+			);
+	}
+	m_bIsFontChanged = false;
+
 	DWRITE_TEXT_METRICS metrics;
 	m_textLayout->GetMetrics(&metrics);
 	Windows::Foundation::Size newSize(metrics.width, metrics.height);
+	// layoutTextSize is used to contain text size without ResolutionScale
+	// otherwise it is possible that due to floating point accuracy problem
+	// the provided size to the layout will be less than required
+	// and the text will be divided in 2 lines instead 1, for example.
+	Windows::Foundation::Size layoutTextSize(metrics.width, metrics.height);
+
+	// allow resolution scale usage
+	newSize.Width *= GetResolutionScale();
+	newSize.Height *= GetResolutionScale();
 
 	if(isShouldAdjustBounds)
 	{
 		tSize->Width = newSize.Width;
 		tSize->Height =  newSize.Height;
 	}
+	else
+	{
+		// Originally provided tSize (provided with an original resolution)
+		// will be used - so layoutTextSize should be calculated.
+		layoutTextSize.Width = tSize->Width / GetResolutionScale();
+		layoutTextSize.Height = tSize->Height / GetResolutionScale();
+	}
 
 	if(tSize->Height <=0)
 	{
 		tSize->Height =  newSize.Height;
 	}
+	else
+	{
+		layoutTextSize.Height = tSize->Height / GetResolutionScale();
+	}
 
-	m_textLayout->SetMaxWidth(tSize->Width);
-	m_textLayout->SetMaxHeight(tSize->Height);
+	m_textLayout->SetMaxWidth(layoutTextSize.Width);
+	m_textLayout->SetMaxHeight(layoutTextSize.Height);
 
 	if(m_whiteBrush == nullptr){
 		DX::ThrowIfFailed(
@@ -255,6 +394,9 @@ Platform::Array<byte>^  DXTextPainter::DrawTextToImage(Platform::String^ text, W
 
 	UINT uiWidth = (UINT)tSize->Width;
 	UINT uiHeight = (UINT)tSize->Height;
+	DX::ThrowIfFailed(
+		wicFormatConverter->GetSize(&uiWidth, &uiHeight)
+		);
 
 	UINT cbStride = uiWidth * 4;
 	UINT cbBufferSize = cbStride * uiHeight;
@@ -271,6 +413,11 @@ Platform::Array<byte>^  DXTextPainter::DrawTextToImage(Platform::String^ text, W
 		DX::ThrowIfFailed(
 			wicFormatConverter->CopyPixels(&rc, cbStride, cbBufferSize,pixelBuffer->Data)
 			);
+
+		// ensure that last bottom/right lines will not be lost - return the same size
+		// (which is used to draw text)
+		tSize->Width = (float)rc.Width;
+		tSize->Height = (float)rc.Height;
 	}
 
 	return pixelBuffer;
@@ -387,4 +534,19 @@ void DXTextPainter::SaveBitmapToStream( _In_ ComPtr<ID2D1Bitmap1> d2dBitmap, _In
 	DX::ThrowIfFailed(
 		stream->Commit(STGC_DEFAULT)
 		);
+}
+
+DXTextPainter::~DXTextPainter()
+{
+	if (m_fontLoader != nullptr)
+	{
+		// Unregister the font loader from DirectWrite factory
+		DX::ThrowIfFailed(
+			m_dwriteFactory->UnregisterFontCollectionLoader(m_fontLoader.Get())
+			);
+
+		DX::ThrowIfFailed(
+			m_dwriteFactory->UnregisterFontFileLoader(m_fontLoader.Get())
+			);
+	}
 }
