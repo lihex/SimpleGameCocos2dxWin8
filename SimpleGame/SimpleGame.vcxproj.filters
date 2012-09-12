@@ -125,6 +125,9 @@
     <Filter Include="tinyxml">
       <UniqueIdentifier>{af97c84d-a432-4f06-b31c-386e58dabe86}</UniqueIdentifier>
     </Filter>
+    <Filter Include="cocos2dx\extendsion">
+      <UniqueIdentifier>{5d2f16c2-7ddd-4c41-a86c-16d7fa7075d2}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <AppxManifest Include="Package.appxmanifest" />
@@ -697,6 +700,9 @@
     <ClInclude Include="..\cocos2dx\platform\win8_metro\DXFontCommon.h">
       <Filter>cocos2dx\platform\win8_metro</Filter>
     </ClInclude>
+    <ClInclude Include="..\cocos2dx\extensions\CCNotificationCenter.h">
+      <Filter>cocos2dx\extendsion</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -1157,6 +1163,9 @@
     </ClCompile>
     <ClCompile Include="..\cocos2dx\platform\win8_metro\FontLoader.cpp">
       <Filter>cocos2dx\platform\win8_metro</Filter>
+    </ClCompile>
+    <ClCompile Include="..\cocos2dx\extensions\CCNotificationCenter.cpp">
+      <Filter>cocos2dx\extendsion</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

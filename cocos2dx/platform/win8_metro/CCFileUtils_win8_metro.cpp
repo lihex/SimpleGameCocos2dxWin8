@@ -41,7 +41,6 @@ using namespace Windows::Storage;
 using namespace Windows::ApplicationModel;
 using namespace std;
 
-
 NS_CC_BEGIN;
 
 // record the resource path
@@ -88,6 +87,12 @@ bool CCFileUtils::isFileExist(const char * resPath)
 
 const char* CCFileUtils::fullPathFromRelativePath(const char *pszRelativePath)
 {
+    ccResolutionType ignore;
+    return fullPathFromRelativePath(pszRelativePath, &ignore);
+}
+
+const char* CCFileUtils::fullPathFromRelativePath(const char *pszRelativePath, ccResolutionType *pResolutionType)
+{
 	_CheckPath();
 
     CCString * pRet = new CCString();
@@ -133,6 +138,10 @@ const char* CCFileUtils::fullPathFromRelativePath(const char *pszRelativePath)
 //        }
 //    }
 //#endif
+	if (pResolutionType)
+	{
+		*pResolutionType = kCCResolutioniPhone;
+	}
 	return pRet->m_sString.c_str();
 }
 

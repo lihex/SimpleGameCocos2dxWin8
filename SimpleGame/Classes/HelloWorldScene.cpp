@@ -61,7 +61,7 @@ bool HelloWorld::init()
 		// super init first
 		//////////////////////////////////////////////////////////////////////////
 
-		CC_BREAK_IF(! CCLayerColor::initWithColor( ccc4(255,255,255,255) ) );
+		CC_BREAK_IF(! CCLayerColor::initWithColor( ccc4f(255,255,255,255) ) );
 
 		//////////////////////////////////////////////////////////////////////////
 		// add your codes below...
@@ -170,7 +170,7 @@ void HelloWorld::ccTouchesEnded(CCSet* touches, CCEvent* event)
 {
 	// Choose one of the touches to work with
 	CCTouch* touch = (CCTouch*)( touches->anyObject() );
-	CCPoint location = touch->locationInView(touch->view());
+	CCPoint location = touch->locationInView();
 
 	location = CCDirector::sharedDirector()->convertToGL(location);
 
